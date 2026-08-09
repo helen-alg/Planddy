@@ -1,0 +1,10 @@
+ktor:
+  deployment:
+    port: 8080
+  application:
+    modules:
+      - com.helen.HttpKt.configureHttp
+      - com.helen.SerializationKt.configureSerialization
+      - com.helen.SecurityKt.configureSecurity
+      - com.helen.StatusPagesKt.configureStatusPages
+      - com.helen.RoutingKt.configureRouting
