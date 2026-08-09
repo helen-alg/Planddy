@@ -5,12 +5,12 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
+    configurePlantRoutes()
+    configureLocationRoutes()
+    configureWateringRoutes()
     routing {
         get("/") {
-            call.respondText("Hello, World!")
-        }
-        get("/json/kotlinx-serialization") {
-            call.respond(mapOf("hello" to "world"))
+            call.respondText("Planddy backend running")
         }
     }
 }
