@@ -1,29 +1,28 @@
 package com.helen
 
+import io.github.cdimascio.dotenv.dotenv
 import io.ktor.server.application.*
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
-import io.ktor.server.response.*
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
+
+private val env = dotenv()
+val jwtSecret: String = env["JWT_SECRET"]
+const val JWT_ISSUER = "planddy"
+const val JWT_AUDIENCE = "planddy-users"
 
 fun Application.configureSecurity() {
-    val jwtAudience = "jwt-audience"
-    val jwtDomain = "https://jwt-provider-domain/"
-    val jwtRealm = "ktor sample app"
-    val jwtSecret = "secret"
-    authentication {
-        jwt {
-            realm = jwtRealm
+    install(Authentication) {
+        jwt("auth-jwt") {
             verifier(
-                JWT
-                    .require(Algorithm.HMAC256(jwtSecret))
-                    .withAudience(jwtAudience)
-                    .withIssuer(jwtDomain)
+                JWT.require(Algorithm.HMAC256(jwtSecret))
+                    .withIssuer(JWT_ISSUER)
+                    .withAudience(JWT_AUDIENCE)
                     .build()
             )
             validate { credential ->
-                if (credential.payload.audience.contains(jwtAudience)) JWTPrincipal(credential.payload) else null
+                if (credential.payload.getClaim("userId").asString() != null) JWTPrincipal(credential.payload) else null
             }
         }
     }

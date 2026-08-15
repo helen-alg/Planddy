@@ -1,6 +1,8 @@
 package com.helen
+
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -31,11 +33,9 @@ fun ResultRow.toPlantDto() = PlantDto(
     fertilizeIntervalOverrideDays = this[Plants.fertilizeIntervalOverrideDays]
 )
 
-
-
 fun Application.configurePlantRoutes() {
-    println(">>> configurePlantRoutes() wurde aufgerufen!")
     routing {
+        // Species bleibt bewusst OHNE Auth – globale, geteilte Wiki-Datenbank
         route("/species") {
             get {
                 val result = transaction { Species.selectAll().map { it.toSpeciesDto() } }
@@ -58,45 +58,51 @@ fun Application.configurePlantRoutes() {
             }
         }
 
-        route("/plants") {
-            get {
-                val result = transaction {
-                    Plants.selectAll().where { Plants.userId eq TEST_USER_ID }.map { it.toPlantDto() }
-                }
-                call.respond(result)
-            }
-            post {
-                val req = call.receive<CreatePlantRequest>()
-                val id = transaction {
-                    Plants.insertAndGetId {
-                        it[userId] = TEST_USER_ID
-                        it[speciesId] = UUID.fromString(req.speciesId)
-                        it[locationId] = req.locationId?.let(UUID::fromString)
-                        it[nickname] = req.nickname
-                        it[acquiredAt] = req.acquiredAt?.let(LocalDate::parse)
-                        it[waterIntervalOverrideDays] = req.waterIntervalOverrideDays
-                        it[fertilizeIntervalOverrideDays] = req.fertilizeIntervalOverrideDays
+        authenticate("auth-jwt") {
+            route("/plants") {
+                get {
+                    val userId = call.userId()
+                    val result = transaction {
+                        Plants.selectAll().where { Plants.userId eq userId }.map { it.toPlantDto() }
                     }
+                    call.respond(result)
                 }
-                call.respond(HttpStatusCode.Created, mapOf("id" to id.value.toString()))
-            }
-            get("/{id}") {
-                val id = call.parameters["id"]?.let(UUID::fromString)
-                    ?: return@get call.respond(HttpStatusCode.BadRequest)
-                val plant = transaction {
-                    Plants.selectAll()
-                        .where { (Plants.id eq id) and (Plants.userId eq TEST_USER_ID) }
-                        .singleOrNull()?.toPlantDto()
+                post {
+                    val userId = call.userId()
+                    val req = call.receive<CreatePlantRequest>()
+                    val id = transaction {
+                        Plants.insertAndGetId {
+                            it[Plants.userId] = userId
+                            it[speciesId] = UUID.fromString(req.speciesId)
+                            it[locationId] = req.locationId?.let(UUID::fromString)
+                            it[nickname] = req.nickname
+                            it[acquiredAt] = req.acquiredAt?.let(LocalDate::parse)
+                            it[waterIntervalOverrideDays] = req.waterIntervalOverrideDays
+                            it[fertilizeIntervalOverrideDays] = req.fertilizeIntervalOverrideDays
+                        }
+                    }
+                    call.respond(HttpStatusCode.Created, mapOf("id" to id.value.toString()))
                 }
-                if (plant == null) call.respond(HttpStatusCode.NotFound) else call.respond(plant)
-            }
-            delete("/{id}") {
-                val id = call.parameters["id"]?.let(UUID::fromString)
-                    ?: return@delete call.respond(HttpStatusCode.BadRequest)
-                val deleted = transaction {
-                    Plants.deleteWhere { (Plants.id eq id) and (Plants.userId eq TEST_USER_ID) }
+                get("/{id}") {
+                    val userId = call.userId()
+                    val id = call.parameters["id"]?.let(UUID::fromString)
+                        ?: return@get call.respond(HttpStatusCode.BadRequest)
+                    val plant = transaction {
+                        Plants.selectAll()
+                            .where { (Plants.id eq id) and (Plants.userId eq userId) }
+                            .singleOrNull()?.toPlantDto()
+                    }
+                    if (plant == null) call.respond(HttpStatusCode.NotFound) else call.respond(plant)
                 }
-                if (deleted > 0) call.respond(HttpStatusCode.NoContent) else call.respond(HttpStatusCode.NotFound)
+                delete("/{id}") {
+                    val userId = call.userId()
+                    val id = call.parameters["id"]?.let(UUID::fromString)
+                        ?: return@delete call.respond(HttpStatusCode.BadRequest)
+                    val deleted = transaction {
+                        Plants.deleteWhere { (Plants.id eq id) and (Plants.userId eq userId) }
+                    }
+                    if (deleted > 0) call.respond(HttpStatusCode.NoContent) else call.respond(HttpStatusCode.NotFound)
+                }
             }
         }
     }

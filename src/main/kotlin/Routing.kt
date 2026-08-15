@@ -5,6 +5,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
+    configureAuthRoutes()
     configurePlantRoutes()
     configureLocationRoutes()
     configureWateringRoutes()

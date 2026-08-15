@@ -20,18 +20,9 @@ object DatabaseFactory {
         }
         val dataSource = HikariDataSource(config)
         Database.connect(dataSource)
-        // in DatabaseFactory.init(), nach Database.connect(dataSource):
+
         transaction {
             SchemaUtils.create(Users, Species, Locations, Plants, WateringEvents)
-            // ... nach SchemaUtils.create(...) im selben transaction-Block:
-                    if (Users.selectAll().where { Users.id eq TEST_USER_ID }.empty()) {
-                        Users.insert {
-                            it[id] = TEST_USER_ID
-                            it[email] = "test@planddy.dev"
-                            it[passwordHash] = "not-a-real-hash"
-                            it[createdAt] = Instant.now()
-                        }
-                    }
         }
     }
 }

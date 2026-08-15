@@ -38,4 +38,7 @@ dependencies {
 
 // .env einlesen
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
+
+    implementation("com.auth0:java-jwt:4.4.0")
+    implementation("org.mindrot:jbcrypt:0.4")
 }
