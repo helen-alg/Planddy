@@ -34,6 +34,14 @@ export const api = {
 
     getPlants: (token: string) =>
         request<Plant[]>('/plants', {}, token),
+
+    getSpecies: () => request<Species[]>('/species'),
+    createSpecies: (data: Partial<Species> & { name: string }) =>
+        request<{ id: string }>('/species', { method: 'POST', body: JSON.stringify(data) }),
+    createPlant: (token: string, data: { speciesId: string; nickname: string }) =>
+        request<{ id: string }>('/plants', { method: 'POST', body: JSON.stringify(data) }, token),
+    getWateringEvents: (plantId: string, token: string) =>
+        request<WateringEvent[]>(`/plants/${plantId}/watering-events`, {}, token),
 }
 
 export interface Plant {
@@ -44,4 +52,22 @@ export interface Plant {
     acquiredAt: string | null
     waterIntervalOverrideDays: number | null
     fertilizeIntervalOverrideDays: number | null
+}
+
+export interface Species {
+    id: string
+    name: string
+    careLight: string | null
+    careWaterIntervalDays: number | null
+    careFertilizeIntervalDays: number | null
+    careTempRange: string | null
+    description: string | null
+    defaultImageUrl: string | null
+}
+
+export interface WateringEvent {
+    id: string
+    plantId: string
+    wateredAt: string
+    note: string | null
 }
