@@ -7,7 +7,9 @@ import io.ktor.server.auth.jwt.*
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 
-private val env = dotenv()
+private val env = dotenv{
+    ignoreIfMissing = true
+}
 val jwtSecret: String = env["JWT_SECRET"]
 const val JWT_ISSUER = "planddy"
 const val JWT_AUDIENCE = "planddy-users"

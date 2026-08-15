@@ -10,7 +10,9 @@ import org.jetbrains.exposed.sql.*
 
 object DatabaseFactory {
     fun init() {
-        val env = dotenv()
+        val env = dotenv{
+            ignoreIfMissing = true
+        }
         val config = HikariConfig().apply {
             jdbcUrl = env["DATABASE_URL"]
             maximumPoolSize = 5
