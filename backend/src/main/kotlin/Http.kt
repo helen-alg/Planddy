@@ -15,5 +15,6 @@ fun Application.configureHttp() {
         allowHeader(HttpHeaders.ContentType)
         allowHeader(HttpHeaders.Authorization)
         allowHost("localhost:5173")
+        allowHost("helen-planddy.vercel.app", schemes = listOf("https"))
     }
 }
