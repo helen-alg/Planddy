@@ -4,7 +4,7 @@ import { useAuth } from '../lib/AuthContext'
 import { Link } from 'react-router-dom'
 
 export function PlantList() {
-    const { token, logout } = useAuth()
+    const { token } = useAuth()
     const [plants, setPlants] = useState<Plant[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
