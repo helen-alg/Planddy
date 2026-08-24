@@ -55,49 +55,46 @@ export function Dashboard() {
     ).length
 
     return (
-        <div className="min-h-screen bg-slate-900 text-white p-6">
-            <h1 className="text-2xl font-semibold mb-6">Dashboard</h1>
+        <div className="min-h-screen bg-paper p-6">
+            <h1 className="font-display text-3xl text-ink mb-6">Dein Garten</h1>
 
             <div className="grid grid-cols-3 gap-4 mb-8">
-                <div className="bg-slate-800 rounded-lg p-4">
-                    <p className="text-slate-400 text-sm">Pflanzen gesamt</p>
-                    <p className="text-3xl font-bold">{statuses.length}</p>
+                <div className="tag-card p-4">
+                    <p className="text-soil text-xs font-mono uppercase tracking-wide">Pflanzen gesamt</p>
+                    <p className="font-display text-4xl text-ink mt-1">{statuses.length}</p>
                 </div>
-                <div className="bg-slate-800 rounded-lg p-4">
-                    <p className="text-slate-400 text-sm">Überfällig</p>
-                    <p className="text-3xl font-bold text-red-400">{overdueCount}</p>
+                <div className="tag-card p-4">
+                    <p className="text-soil text-xs font-mono uppercase tracking-wide">Überfällig</p>
+                    <p className="font-display text-4xl text-bloom mt-1">{overdueCount}</p>
                 </div>
-                <div className="bg-slate-800 rounded-lg p-4">
-                    <p className="text-slate-400 text-sm">Bald fällig</p>
-                    <p className="text-3xl font-bold text-amber-400">{dueSoonCount}</p>
+                <div className="tag-card p-4">
+                    <p className="text-soil text-xs font-mono uppercase tracking-wide">Bald fällig</p>
+                    <p className="font-display text-4xl text-moss mt-1">{dueSoonCount}</p>
                 </div>
             </div>
 
-            {loading && <p className="text-slate-400">Lädt...</p>}
+            {loading && <p className="text-ink-soft font-mono text-sm">Lädt...</p>}
 
-            <ul className="space-y-2">
+            <ul className="space-y-3">
                 {statuses.map(({ plant, species, nextDueAt, overdue }) => (
-                    <li key={plant.id} className="bg-slate-800 rounded-lg p-4 flex justify-between items-center">
+                    <li key={plant.id} className="tag-card p-4 flex justify-between items-center">
                         <div>
-                            <p className="font-medium">{plant.nickname}</p>
-                            <p className="text-sm text-slate-400">{species?.name ?? 'Unbekannte Art'}</p>
+                            <p className="font-display text-lg text-ink">{plant.nickname}</p>
+                            <p className="text-sm text-ink-soft">{species?.name ?? 'Unbekannte Art'}</p>
                         </div>
-                        <span className={overdue ? 'text-red-400 text-sm' : 'text-slate-400 text-sm'}>
-              {nextDueAt
-                  ? overdue
-                      ? 'Überfällig'
-                      : `Fällig ${nextDueAt.toLocaleDateString('de-DE')}`
-                  : 'Kein Gieß-Intervall gesetzt'}
-            </span>
+                        <span className={`font-mono text-xs px-2 py-1 rounded ${overdue ? 'bg-bloom-soft text-bloom' : 'bg-paper-deep text-ink-soft'}`}>
+            {nextDueAt
+                ? overdue ? 'Überfällig' : `Fällig ${nextDueAt.toLocaleDateString('de-DE')}`
+                : 'Kein Intervall'}
+          </span>
                     </li>
                 ))}
             </ul>
 
             {!loading && statuses.length === 0 && (
-                <p className="text-slate-400">
-                    Noch keine Pflanzen. <Link to="/plants/new" className="text-emerald-400">Erste Pflanze anlegen</Link>
+                <p className="text-ink-soft">
+                    Noch keine Pflanzen. <Link to="/plants/new" className="text-moss underline">Erste Pflanze anlegen</Link>
                 </p>
             )}
         </div>
-    )
-}
+    )}
